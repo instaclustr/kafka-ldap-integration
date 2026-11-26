@@ -33,7 +33,7 @@ group = 'com.ultratendency.kafka.ldap'
 version = '3.6.0' // x-release-please-version
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_24
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 test {
@@ -55,9 +55,14 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jackson_version"
 
-    implementation "org.apache.kafka:kafka_$scala_version:$kafka_version"
     implementation "com.github.ben-manes.caffeine:caffeine:$caffeine_version"
-    implementation "org.slf4j:slf4j-api:$slf4j_version"
+
+    // Provided by the Kafka broker at runtime. compileOnly keeps them (and Kafka's transitive deps such as
+    // Scala, log4j2, lz4, snappy) out of the shadow JAR; a bundled copy shadows the broker's own classes.
+    compileOnly "org.apache.kafka:kafka_$scala_version:$kafka_version"
+    compileOnly "org.slf4j:slf4j-api:$slf4j_version"
+    testImplementation "org.apache.kafka:kafka_$scala_version:$kafka_version"
+    testImplementation "org.slf4j:slf4j-api:$slf4j_version"
 
     testImplementation "org.amshove.kluent:kluent:$kluent_version"
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")  {
@@ -75,10 +80,10 @@ configurations.all {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_24.toString()
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_21.toString()
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_24.toString()
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_21.toString()
 }
 
 test {
